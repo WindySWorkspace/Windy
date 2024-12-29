@@ -1,2 +1,0 @@
-# Windy
-Dash killer

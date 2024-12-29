@@ -1,0 +1,66 @@
+using UnityEngine;
+
+public class Movement : MonoBehaviour
+{
+    public float moveSpeed = 8f; // Base movement speed
+    public float dashSpeed = 30f; // Speed during dash
+    public float dashDuration = 0.2f; // How long the dash lasts
+    public float dashCooldown = 1f; // Cooldown between dashes
+
+    private Rigidbody2D rb2d;
+    private Vector2 moveInput;
+    private bool isDashing = false;
+    private float dashTime = 0f;
+    private float dashCooldownTime = 0f;
+
+    void Start()
+    {
+        rb2d = GetComponent<Rigidbody2D>();
+    }
+
+    void Update()
+    {
+        // Handle movement input
+        moveInput.x = Input.GetAxisRaw("Horizontal");
+        moveInput.y = Input.GetAxisRaw("Vertical");
+        moveInput.Normalize();
+
+        // Handle dash input (changed to Space key)
+        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && Time.time > dashCooldownTime)
+        {
+            StartDash();
+        }
+
+        // Update dash timer
+        if (isDashing)
+        {
+            dashTime -= Time.deltaTime;
+            if (dashTime <= 0)
+            {
+                EndDash();
+            }
+        }
+    }
+
+    void FixedUpdate()
+    {
+        if (!isDashing)
+        {
+            // Regular movement
+            rb2d.linearVelocity = moveInput * moveSpeed;
+        }
+    }
+
+    void StartDash()
+    {
+        isDashing = true;
+        dashTime = dashDuration;
+        dashCooldownTime = Time.time + dashCooldown;
+        rb2d.linearVelocity = moveInput * dashSpeed;
+    }
+
+    void EndDash()
+    {
+        isDashing = false;
+    }
+}
