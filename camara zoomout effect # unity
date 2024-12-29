@@ -1,0 +1,77 @@
+using UnityEngine;
+
+public class CameraZoomOnDash : MonoBehaviour
+{
+    public Camera mainCamera;  // Reference to the main camera
+    public float normalSize = 5f;  // Normal camera orthographic size
+    public float dashSize = 8f;  // Zoom-out size during dash
+    public float zoomSpeed = 5f;  // Speed at which the camera zooms in and out
+    public float dashDuration = 0.2f;  // Duration of dash
+    public float dashCooldown = 1f;  // Cooldown time between dashes
+
+    private float dashTime = 0f;  // Timer to keep track of dash time
+    private bool isDashing = false;  // Flag to check if the player is dashing
+    private bool isCooldown = false;  // Flag to check if cooldown is active
+    private float cooldownTime = 0f;  // Timer for cooldown
+
+    private void Start()
+    {
+        // Ensure the camera is assigned
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+        }
+    }
+
+    void Update()
+    {
+        // Handle dash input if no cooldown is active
+        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && !isCooldown)
+        {
+            StartDash();
+        }
+
+        // If dashing, reduce the dash time and update camera zoom
+        if (isDashing)
+        {
+            dashTime -= Time.deltaTime;
+            if (dashTime <= 0)
+            {
+                EndDash();
+            }
+        }
+
+        // Handle cooldown timer after dash
+        if (isCooldown)
+        {
+            cooldownTime -= Time.deltaTime;
+            if (cooldownTime <= 0)
+            {
+                isCooldown = false;  // Cooldown is over, allow dashing again
+            }
+        }
+
+        // Smoothly transition the camera size based on the dash state
+        if (isDashing)
+        {
+            mainCamera.orthographicSize = Mathf.Lerp(mainCamera.orthographicSize, dashSize, zoomSpeed * Time.deltaTime);
+        }
+        else
+        {
+            mainCamera.orthographicSize = Mathf.Lerp(mainCamera.orthographicSize, normalSize, zoomSpeed * Time.deltaTime);
+        }
+    }
+
+    void StartDash()
+    {
+        isDashing = true;
+        dashTime = dashDuration;  // Set dash duration
+        isCooldown = true;  // Start cooldown
+        cooldownTime = dashCooldown;  // Set cooldown time
+    }
+
+    void EndDash()
+    {
+        isDashing = false;  // End the dash
+    }
+}
